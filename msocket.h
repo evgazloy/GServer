@@ -5,6 +5,7 @@
 #include <QTimer>
 #include <QSslSocket>
 #include <QFile>
+#include "tcpcommands.h"
 
 class MSocket : public QObject
 {
@@ -22,8 +23,14 @@ public:
 private:
     QSslSocket *m_socket;
     quint8 m_type;
+    quint32 m_dataSize = 0;
+    QByteArray m_inBuffer;
 
     void encrypted();
+    void inData();
+    void parse();
+
+    void registerNewClient(const cmdRegistration_s &data);
 
 signals:
     void sig_delete();
