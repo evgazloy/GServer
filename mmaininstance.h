@@ -6,6 +6,7 @@
 #include <QTcpServer>
 #include <QThread>
 #include "msocket.h"
+#include "mcontrol.h"
 
 #define mINTERFACE QHostAddress::Any
 #define mPORT 32345
@@ -14,7 +15,7 @@ class MMainInstance : public QTcpServer
 {
     Q_OBJECT
 public:
-    explicit MMainInstance(int argc, char *argv[], QObject *parent = 0);
+    explicit MMainInstance(QObject *parent = 0);
     ~MMainInstance();
 
 private:
@@ -27,8 +28,9 @@ private:
     };
 
     Options_s m_options;
+    MControl m_control;
 
-    void parseArgs(int argc, char *argv[]);
+    void parseArgs();
     void initSocket(qintptr handle);
     void deleteSocket();
 

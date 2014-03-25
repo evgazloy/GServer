@@ -5,35 +5,27 @@
 #include <QTimer>
 #include <QSslSocket>
 #include <QFile>
+#include <QByteArray>
 #include "tcpcommands.h"
 
 class MSocket : public QObject
 {
     Q_OBJECT
 public:
-    explicit MSocket(quint8 type, qintptr handle, QObject *parent = 0);
+    explicit MSocket(qintptr handle, QObject *parent = 0);
     ~MSocket();
-
-    enum
-    {
-        SERVER_TYPE,
-        CLIENT_TYPE
-    };
 
 private:
     QSslSocket *m_socket;
-    quint8 m_type;
     quint32 m_dataSize = 0;
     QByteArray m_inBuffer;
 
     void encrypted();
     void inData();
-    void parse();
-
-    void registerNewClient(const cmdRegistration_s &data);
 
 signals:
     void sig_delete();
+    void sig_cmd(QByteArray data);
 
 public slots:
     void socketError(const QList<QSslError> &list);

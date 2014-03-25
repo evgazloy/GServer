@@ -1,54 +1,38 @@
 #include "mmaininstance.h"
 #include <QDebug>
+#include <QCommandLineParser>
 
-MMainInstance::MMainInstance(int argc, char *argv[], QObject *parent) :
+MMainInstance::MMainInstance(QObject *parent) :
     QTcpServer(parent)
 {
-    this->parseArgs(argc, argv);
+    this->parseArgs();
     if(this->listen(m_options.interface, m_options.port))
         qDebug()<<"Server started on"<<m_options.interface.toString()<<":"<<m_options.port;
     else
         qCritical()<<"Server can't started."<<this->errorString();
 }
 
-void MMainInstance::parseArgs(int argc, char *argv[])
+void MMainInstance::parseArgs()
 {
-    for(int i=1;i<argc;i++)
+    QCommandLineParser parser;
+    parser.setApplicationDescription("Grow server");
+    parser.addHelpOption();
+    parser.addVersionOption();
+
+    QCommandLineOption interface(QStringList()<<"i"<<"interface", "Interface to listen", "ip", "0.0.0.0");
+    parser.addOption(interface);
+
+    QCommandLineOption port(QStringList()<<"p"<<"port", "Port to listen", "number", "32345");
+    parser.addOption(port);
+
+    parser.process(QCoreApplication::arguments());
+
+    m_options.interface = QHostAddress(parser.value(interface));
+    m_options.port = parser.value(port).toInt();
+    if(m_options.interface.isNull())
     {
-        QString arg(argv[i]);
-        if(arg.size()>1 && arg.at(0) == '-')
-        {
-            char cmd = arg.at(1).toLatin1();
-            QString param(arg.mid(2));
-
-            switch(cmd)
-            {
-            case 'i':
-            {
-                QHostAddress interface(param);
-                if(!interface.isNull())
-                    m_options.interface = interface;
-                else
-                    qWarning()<<"Invalid interface";
-                break;
-            }
-
-            case 'p':
-            {
-                bool status = false;
-                quint16 port = param.toInt(&status, 10);
-                if(status)
-                    m_options.port = port;
-                else
-                    qWarning()<<"Invalid port";
-                break;
-            }
-            default:
-                qWarning()<<"Unknown argument -"<<cmd;
-            }
-        }
-        else
-            qWarning()<<"Unknown argument"<<arg;
+        qDebug()<<"Invalid interface";
+        m_options.interface = QHostAddress::Any;
     }
 }
 
@@ -57,10 +41,11 @@ void MMainInstance::initSocket(qintptr handle)
     QThread *cThread = QThread::currentThread();
     Q_CHECK_PTR(cThread);
 
-    MSocket *socket = new MSocket(MSocket::SERVER_TYPE, handle);
+    MSocket *socket = new MSocket(handle);
     Q_CHECK_PTR(socket);
 
     connect(socket, &MSocket::sig_delete, this, &MMainInstance::deleteSocket, Qt::QueuedConnection);
+    connect(socket, &MSocket::sig_cmd, &m_control, &MControl::inCmd, Qt::QueuedConnection);
 }
 
 void MMainInstance::deleteSocket()

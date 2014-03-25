@@ -19,9 +19,11 @@ TEMPLATE = app
 
 SOURCES += main.cpp \
     mmaininstance.cpp \
-    msocket.cpp
+    msocket.cpp \
+    mcontrol.cpp
 
 HEADERS += \
     mmaininstance.h \
     msocket.h \
-    tcpcommands.h
+    tcpcommands.h \
+    mcontrol.h
