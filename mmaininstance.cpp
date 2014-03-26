@@ -45,13 +45,19 @@ void MMainInstance::initSocket(qintptr handle)
     Q_CHECK_PTR(socket);
 
     connect(socket, &MSocket::sig_delete, this, &MMainInstance::deleteSocket, Qt::QueuedConnection);
-    connect(socket, &MSocket::sig_cmd, &m_control, &MControl::inCmd, Qt::QueuedConnection);
+
+    foreach (MSocket *otherSocket, m_sockets) {
+        connect(socket, &MSocket::sig_send, otherSocket, &MSocket::send, Qt::QueuedConnection);
+        connect(otherSocket, &MSocket::sig_send, socket, &MSocket::send, Qt::QueuedConnection);
+    }
+    m_sockets.append(socket);
 }
 
 void MMainInstance::deleteSocket()
 {
     MSocket *cSocket = (MSocket*)QObject::sender();
     Q_CHECK_PTR(cSocket);
+    m_sockets.removeAll(cSocket);
 
     QThread *cThread = cSocket->thread();
     Q_CHECK_PTR(cThread);

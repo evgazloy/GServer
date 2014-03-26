@@ -6,7 +6,6 @@
 #include <QTcpServer>
 #include <QThread>
 #include "msocket.h"
-#include "mcontrol.h"
 
 #define mINTERFACE QHostAddress::Any
 #define mPORT 32345
@@ -28,7 +27,7 @@ private:
     };
 
     Options_s m_options;
-    MControl m_control;
+    QList<MSocket *> m_sockets;
 
     void parseArgs();
     void initSocket(qintptr handle);

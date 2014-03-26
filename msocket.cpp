@@ -23,7 +23,7 @@ MSocket::MSocket(qintptr handle, QObject *parent) :
     {
         m_socket->setPrivateKey("../keys/server.pem");
         m_socket->setLocalCertificate("../keys/server.pem");
-        m_socket->addCaCertificates("../keys/rootCA.pem");
+        m_socket->addCaCertificates("../keys/client.pem");
 
         m_socket->startServerEncryption();
     }
@@ -60,8 +60,14 @@ void MSocket::inData()
         m_inBuffer.append(buffer);
         m_dataSize -= byteToRead;
         if(!m_dataSize)
-            emit sig_cmd(m_inBuffer);
+            emit sig_send(m_inBuffer);
     }
+}
+
+void MSocket::send(QByteArray data)
+{
+    Q_CHECK_PTR(m_socket);
+    m_socket->write(data);
 }
 
 void MSocket::socketError(const QList<QSslError> &list)

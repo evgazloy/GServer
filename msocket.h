@@ -6,7 +6,6 @@
 #include <QSslSocket>
 #include <QFile>
 #include <QByteArray>
-#include "tcpcommands.h"
 
 class MSocket : public QObject
 {
@@ -25,11 +24,12 @@ private:
 
 signals:
     void sig_delete();
-    void sig_cmd(QByteArray data);
+    void sig_send(QByteArray data);
 
 public slots:
     void socketError(const QList<QSslError> &list);
     void socketError(QAbstractSocket::SocketError error);
+    void send(QByteArray data);
 };
 
 #endif // MSOCKET_H
