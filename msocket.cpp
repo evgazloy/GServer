@@ -46,6 +46,7 @@ void MSocket::inData()
                 continue;
             in>>m_dataSize;
             m_inBuffer.clear();
+            QDataStream(&m_inBuffer, QIODevice::WriteOnly)<<m_dataSize;
         }
         qint64 byteToRead = qMin<qint64>(m_socket->bytesAvailable(), m_dataSize);
 
